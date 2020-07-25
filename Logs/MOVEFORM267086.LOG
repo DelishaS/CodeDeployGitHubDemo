@@ -1,0 +1,33 @@
+##########################################################################################################
+Promote start: 1/9/2020 7:23:10 PM at server UPCPRDCFDB1 for account .  SiteManager 6.0 - MOVEFORM267086.
+##########################################################################################################
+Technical Contact is Anusha at phone number (803) 333-748117
+##########################################################################################################
+    Shutting down IISADMIN
+    Shutting down MTS processes
+    Shutting down W3SVC
+    Shutting down SMTPSVC
+    Shutting down MSFTPSVC
+    Shutting down IISADMIN
+    Shutting down MSDTC
+##########################################################################################################
+##########################################################################################################
+##########################################################################################################
+Backed Up Prior Version of
+    E:\Program Files\Apache Software Foundation\Tomcat 7.0\webapps\upc_prd_commfw\recxml\com\csc\cfw\pt\records\PointErrorRecord.xml
+    TO
+    F:\CSCCODEMOVES\MOVEFORM267086\MOVEFORM267086.ZIP
+Copied File 
+    F:\CSCCODEMOVES\MOVEFORM267086\PointErrorRecord.xml
+    TO
+    E:\Program Files\Apache Software Foundation\Tomcat 7.0\webapps\upc_prd_commfw\recxml\com\csc\cfw\pt\records\PointErrorRecord.xml
+ Copied PointErrorRecord.xml to E:\Program Files\Apache Software Foundation\Tomcat 7.0\webapps\upc_prd_commfw\recxml\com\csc\cfw\pt\records
+##########################################################################################################
+##########################################################################################################
+    Restarting IISADMIN
+    Restarting SMTPSVC
+    Restarting MSDTC
+    Restarting W3SVC
+    Restarting MSFTPSVC
+##########################################################################################################
+Promote Process Succeeded: 1/9/2020 7:23:35 PM

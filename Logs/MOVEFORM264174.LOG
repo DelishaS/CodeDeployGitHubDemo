@@ -1,0 +1,496 @@
+##########################################################################################################
+Promote start: 10/22/2019 7:34:52 AM at server UPCVUATWAX1 for account .  SiteManager 6.0 - MOVEFORM264174.
+##########################################################################################################
+Technical Contact is Anusha at phone number 3027811010-748117
+##########################################################################################################
+##########################################################################################################
+##########################################################################################################
+ Backing up database UPC_PKG_NEWBUSINESS
+Backed Up Database UPC_PKG_NEWBUSINESS
+Executing SQL Item: Truncate_NewBusiness.sql
+##########################################################################################################
+Truncate Table SHSeleDeliveryIdDateAssignment
+
+Truncate Table SHSeleHurricaneDed
+
+Truncate Table HOSeleRespondingFireDept
+
+##########################################################################################################
+SQL Results for Truncate_NewBusiness.sql
+##########################################################################################################
+##########################################################################################################
+Completed executing SQL Item: Truncate_NewBusiness.sql
+##########################################################################################################
+ Backing up database UPC_PKG_XMLTRANSACTIONS
+Backed Up Database UPC_PKG_XMLTRANSACTIONS
+Executing SQL Item: Alter_UPC_4430_SHAdminMessageIndex.sql
+##########################################################################################################
+ALTER TABLE SHAdminMessageIndex ADD EEVendorName varchar(50) NULL
+##########################################################################################################
+SQL Results for Alter_UPC_4430_SHAdminMessageIndex.sql
+##########################################################################################################
+##########################################################################################################
+Completed executing SQL Item: Alter_UPC_4430_SHAdminMessageIndex.sql
+##########################################################################################################
+Executing SQL Item: SHAdminSeleEEVendorName.sql
+##########################################################################################################
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[SHAdminSeleEEVendorName]') AND type in (N'U'))
+DROP TABLE [dbo].[SHAdminSeleEEVendorName]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[SHAdminSeleEEVendorName](
+	[Code] [varchar](50) NOT NULL,
+	[Description] [varchar](50) NULL,
+	[SortOrder] [smallint] NULL,
+ CONSTRAINT [PK_SHAdminSeleEEMessageVendor] PRIMARY KEY CLUSTERED 
+(
+	[Code] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON, FILLFACTOR = 90) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+GRANT DELETE ON [dbo].[SHAdminSeleEEVendorName] TO [isol_app] AS [dbo]
+GO
+GRANT INSERT ON [dbo].[SHAdminSeleEEVendorName] TO [isol_app] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[SHAdminSeleEEVendorName] TO [isol_app] AS [dbo]
+GO
+GRANT UPDATE ON [dbo].[SHAdminSeleEEVendorName] TO [isol_app] AS [dbo]
+GO
+##########################################################################################################
+SQL Results for SHAdminSeleEEVendorName.sql
+##########################################################################################################
+##########################################################################################################
+Completed executing SQL Item: SHAdminSeleEEVendorName.sql
+##########################################################################################################
+Executing SQL Item: SHAdminInsertMessageIndex.sql
+##########################################################################################################
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[SHAdminInsertMessageIndex]') AND type in (N'P', N'PC'))
+DROP PROCEDURE [dbo].[SHAdminInsertMessageIndex]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE Procedure [dbo].[SHAdminInsertMessageIndex]
+@SessionId varchar(50)=Null
+,@LogTimeStamp nvarchar(50) 
+,@MessageType varchar(50)
+,@BeginTime nvarchar(50) 
+,@PolicySymbol varchar(3)
+,@PolicyNumber varchar(7)
+,@PolicyModule char(2)
+,@AppId varchar(50)
+,@PrimaryState char(2)
+,@InsuredName varchar(100)
+,@LineOfBusiness varchar(20)
+,@MessageStatus varchar(50)
+,@MessageErrorDescription varchar(100)
+,@MessageLogId varchar(50)
+,@EEVendorName varchar(50) = NULL --UPC-4430
+As
+ set nocount on
+ Declare @error int
+	Insert into SHAdminMessageIndex (SessionId, LogTimeStamp, MessageType, BeginTime, PolicySymbol, PolicyNumber, 
+			--UPC-4430 PolicyModule, AppId, PrimaryState, InsuredName, LineOfBusiness, MessageStatus, MessageErrorDescription, MessageLogId)
+			PolicyModule, AppId, PrimaryState, InsuredName, LineOfBusiness, MessageStatus, MessageErrorDescription, MessageLogId, EEVendorName) --UPC-4430
+		values (@SessionId, @LogTimeStamp, @MessageType, @BeginTime, @PolicySymbol, @PolicyNumber, 
+			--UPC-4330 @PolicyModule, @AppId, @PrimaryState, @InsuredName, @LineOfBusiness, @MessageStatus, @MessageErrorDescription, @MessageLogId)
+			@PolicyModule, @AppId, @PrimaryState, @InsuredName, @LineOfBusiness, @MessageStatus, @MessageErrorDescription, @MessageLogId, @EEVendorName) --UPC-4430
+Set @error = @@error
+If @error <> 0
+    return @error
+else
+    return 0
+GO
+GRANT EXECUTE ON [dbo].[SHAdminInsertMessageIndex] TO [Analysts] AS [dbo]
+GO
+GRANT EXECUTE ON [dbo].[SHAdminInsertMessageIndex] TO [isol_app] AS [dbo]
+GO
+GRANT EXECUTE ON [dbo].[SHAdminInsertMessageIndex] TO [SuppTableOwner] AS [dbo]
+GO
+GRANT EXECUTE ON [dbo].[SHAdminInsertMessageIndex] TO [Technical] AS [dbo]
+GO
+##########################################################################################################
+SQL Results for SHAdminInsertMessageIndex.sql
+##########################################################################################################
+##########################################################################################################
+Completed executing SQL Item: SHAdminInsertMessageIndex.sql
+##########################################################################################################
+Executing SQL Item: SHRetrieveAdminMessageIndex.sql
+##########################################################################################################
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[SHRetrieveAdminMessageIndex]') AND type in (N'P', N'PC'))
+DROP PROCEDURE [dbo].[SHRetrieveAdminMessageIndex]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[SHRetrieveAdminMessageIndex]
+@BeginDateTime VARCHAR(100) = NULL,
+@EndDateTime VARCHAR(100) = NULL,
+@LOB VARCHAR(3) = NULL,
+@PolicySymbol VARCHAR(3) = NULL,
+@PolicyNumber VARCHAR(25) = NULL,
+@PolicyModule VARCHAR(2) = NULL,
+@AppId VARCHAR(50) = NULL,
+@PrimaryState VARCHAR(50) = NULL,
+@InsuredName VARCHAR(100) = NULL,
+@MessageType VARCHAR(50) = NULL,
+@MessageStatus VARCHAR(50) = NULL,
+@EEVendorName VARCHAR(50) = NULL, --UPC-4430
+@PageSize INT = 10,
+@PageNum INT = 1,
+@SortKey VARCHAR(200) = 'LogTimeStamp',
+@SortDir VARCHAR(5) = 'ASC'
+AS
+BEGIN
+	SET NOCOUNT ON
+	DECLARE @SortExpression VARCHAR(250)
+	DECLARE @ERROR INT
+	DECLARE @SQL NVARCHAR(4000);
+	DECLARE @SQLCount NVARCHAR(4000);
+	DECLARE @ParameterDefinition NVARCHAR(1000);
+	DECLARE @ParameterDefinitionCount NVARCHAR(1000);
+	SELECT	@ParameterDefinition = '
+		@BeginDateTime VARCHAR(100),
+		@EndDateTime VARCHAR(100),
+		@LOB VARCHAR(3),
+		@PolicySymbol VARCHAR(3),
+		@PolicyNumber VARCHAR(25),
+		@PolicyModule VARCHAR(2),
+		@AppId VARCHAR(50),
+		@PrimaryState VARCHAR(50),
+		@InsuredName VARCHAR(100),
+		@MessageType VARCHAR(50),
+		@MessageStatus VARCHAR(50), 
+		@EEVendorName VARCHAR(50), --UPC-4430
+		@PageSize INT = 10,
+		@PageNum INT = 1	
+	';
+	SELECT	@ParameterDefinitionCount = '
+		@BeginDateTime VARCHAR(100),
+		@EndDateTime VARCHAR(100),
+		@LOB VARCHAR(3),
+		@PolicySymbol VARCHAR(3),
+		@PolicyNumber VARCHAR(25),
+		@PolicyModule VARCHAR(2),
+		@AppId VARCHAR(50),
+		@PrimaryState VARCHAR(50),
+		@InsuredName VARCHAR(100),
+		@MessageType VARCHAR(50),
+		@MessageStatus VARCHAR(50),	--UPC-4430
+		@EEVendorName VARCHAR(50) --UPC-4430	
+	';
+	
+	SELECT @SQL = ''
+	SELECT @SQLCount = ''
+	SELECT @SortExpression = (@SortKey + ' ' + @SortDir)
+	
+	IF @SortKey = 'LogTimeStamp'
+	BEGIN
+		SET @SortExpression = 'CAST(SUBSTRING(LogTimeStamp,1, 19) + '' '' + SUBSTRING(LogTimeStamp,29, 2) AS DATETIME) ' 
+		+ @SortDir
+		+ ', SUBSTRING(LogTimeStamp,21, 7) ' + @SortDir		
+	END
+	
+	IF @BeginDateTime IS NOT NULL AND @BeginDateTime <> ''
+	BEGIN
+		SELECT @SQL = @SQL + N'
+		AND CAST(SUBSTRING(LogTimeStamp,1, 19) + '' '' + SUBSTRING(LogTimeStamp,29, 2) AS DATETIME) >= @BeginDateTime ';
+	END
+	
+	IF @EndDateTime IS NOT NULL AND @EndDateTime <> ''
+	BEGIN
+		SELECT @SQL = @SQL + N'
+		AND CAST(SUBSTRING(LogTimeStamp,1, 19) + '' '' + SUBSTRING(LogTimeStamp,29, 2) AS DATETIME) <= @EndDateTime ';
+	END
+	
+	IF @PolicySymbol IS NOT NULL AND @PolicySymbol <> ''
+	BEGIN
+		SELECT @SQL = @SQL + N'
+		AND PolicySymbol LIKE ''%'' + @PolicySymbol + ''%'' ';
+	END
+	
+	IF @PolicyNumber IS NOT NULL AND @PolicyNumber <> ''
+	BEGIN
+		SELECT @SQL = @SQL + N'
+		AND PolicyNumber LIKE ''%'' + @PolicyNumber + ''%'' ';
+	END
+	
+	IF @PolicyModule IS NOT NULL AND @PolicyModule <> ''
+	BEGIN
+		SELECT @SQL = @SQL + N'
+		AND PolicyModule = @PolicyModule ';
+	END
+	
+	IF @MessageType IS NOT NULL AND @MessageType <> ''
+	BEGIN
+		--UPC-1323:Start
+		--SELECT @SQL = @SQL + N'
+		--AND MessageType LIKE ''%'' + @MessageType + ''%'' ';
+		SELECT @SQL = @SQL + N'
+		AND MessageType = @MessageType ';
+		--UPC-1323:End
+	END
+	
+	IF @MessageStatus IS NOT NULL AND @MessageStatus <> ''
+	BEGIN
+		SELECT @SQL = @SQL + N'
+		AND MessageStatus = @MessageStatus ';
+	END
+	--UPC-4430:Start
+	IF @EEVendorName IS NOT NULL AND @EEVendorName <> ''
+	BEGIN
+		SELECT @SQL = @SQL + N'
+		AND EEVendorName = @EEVendorName ';
+	END
+	--UPC-4430:End
+	
+	IF @InsuredName IS NOT NULL AND @InsuredName <> ''
+	BEGIN
+		SELECT @SQL = @SQL + N'
+		AND InsuredName LIKE ''%'' + @InsuredName + ''%'' ';
+	END
+	
+	--UPC-1185:starts
+	IF @PrimaryState IS NOT NULL AND @PrimaryState <> ''
+	BEGIN
+		SELECT @SQL = @SQL + N'
+		AND PrimaryState = @PrimaryState ';
+	END
+	--UPC-1185:ends
+	
+	IF @AppId IS NOT NULL AND @AppId <> ''
+	BEGIN
+		SELECT @SQL = @SQL + N'
+		AND AppId LIKE ''%'' + @AppId + ''%'' ';
+	END
+	
+	IF @LOB IS NOT NULL AND @LOB <> ''
+	BEGIN
+		--UPC-1154:starts
+		IF @LOB = 'HO'
+		BEGIN
+			SELECT @SQL = @SQL + N'
+			AND LineOfBusiness IN (''HP'', ''HO'') ';
+		END
+		ELSE
+		BEGIN
+			SELECT @SQL = @SQL + N'
+			AND LineOfBusiness = @LOB ';
+		END
+		--UPC-1154:ends
+	END
+	
+	SELECT	@SQLCount = N'
+			SELECT '+cast(@PageNum as char)+' as PageNum,COUNT(1) AS TotalRecords
+			FROM SHAdminMessageIndex
+			WHERE 1 = 1 ' + @SQL;
+	
+	SELECT	@SQL = N'
+			SELECT 
+				LogTimeStamp
+				,PolicySymbol
+				,PolicyNumber
+				,PolicyModule
+				,PrimaryState
+				,InsuredName
+				,MessageType
+				,MessageStatus
+				,EEVendorName --UPC-4430
+				,MessageLogId
+				,Premium
+				,AppId
+			FROM 
+			(
+			SELECT
+				ROW_NUMBER() OVER(ORDER BY ' + @SortExpression + ') AS NUMBER --UPC-1154
+				,LogTimeStamp
+				,PolicySymbol
+				,PolicyNumber
+				,PolicyModule
+				,PrimaryState
+				,InsuredName
+				,MessageType
+				,MessageStatus
+				,EEVendorName --UPC-4430
+				,MessageLogId
+				,Premium
+				,AppId
+			FROM SHAdminMessageIndex 
+			WHERE 1 = 1 ' + @SQL +
+			') AS TBL
+	WHERE NUMBER BETWEEN ((@PageNum - 1) * @PageSize + 1) AND (@PageNum * @PageSize)
+	ORDER BY ' + @SortExpression; --UPC-1154
+	
+	SELECT   
+	   '0' AS ReturnStatusCd  
+	   ,'Messages returned successfully' AS ReturnStatusDesc
+	   
+	PRINT @SQL
+	EXEC sp_executeSQL 
+		@SQL,
+		@ParameterDefinition,
+		@BeginDateTime = @BeginDateTime,
+		@EndDateTime = @EndDateTime,
+		@LOB = @LOB,
+		@PolicySymbol = @PolicySymbol,
+		@PolicyNumber = @PolicyNumber,
+		@PolicyModule = @PolicyModule,
+		@AppId = @AppId,
+		@PrimaryState = @PrimaryState,
+		@InsuredName = @InsuredName,
+		@MessageType = @MessageType,
+		@MessageStatus = @MessageStatus,
+		@EEVendorName = @EEVendorName, --UPC-4430
+		@PageSize = @PageSize,
+		@PageNum = @PageNum;
+		
+	EXEC sp_executeSQL 
+		@SQLCount,
+		@ParameterDefinitionCount,
+		@BeginDateTime = @BeginDateTime,
+		@EndDateTime = @EndDateTime,
+		@LOB = @LOB,
+		@PolicySymbol = @PolicySymbol,
+		@PolicyNumber = @PolicyNumber,
+		@PolicyModule = @PolicyModule,
+		@AppId = @AppId,
+		@PrimaryState = @PrimaryState,
+		@InsuredName = @InsuredName,
+		@MessageType = @MessageType,
+		@MessageStatus = @MessageStatus, --UPC-4430
+		@EEVendorName = @EEVendorName; --UPC-4430
+	
+END
+/* Return any errors */
+SET @ERROR = @@ERROR
+IF @ERROR <> 0
+	RETURN @ERROR
+ELSE
+	RETURN 0
+SET NOCOUNT  OFF
+GO
+GRANT EXECUTE ON [dbo].[SHRetrieveAdminMessageIndex] TO [Analysts] AS [dbo]
+GO
+GRANT EXECUTE ON [dbo].[SHRetrieveAdminMessageIndex] TO [isol_app] AS [dbo]
+GO
+GRANT EXECUTE ON [dbo].[SHRetrieveAdminMessageIndex] TO [SuppTableOwner] AS [dbo]
+GO
+GRANT EXECUTE ON [dbo].[SHRetrieveAdminMessageIndex] TO [Technical] AS [dbo]
+GO
+##########################################################################################################
+SQL Results for SHRetrieveAdminMessageIndex.sql
+##########################################################################################################
+##########################################################################################################
+Completed executing SQL Item: SHRetrieveAdminMessageIndex.sql
+##########################################################################################################
+##########################################################################################################
+##########################################################################################################
+Executing BCP Item: HOSeleRespondingFireDept.bcp
+##########################################################################################################
+PT	99	99	99	99 	FL	RM120010005         	ALACHUA	1	1	00001
+PT	99	99	99	99 	FL	RM120010007         	ALACHUA CO FD	1	1	00001
+PT	99	99	99	99 	FL	RM120010010         	ALACHUA OPA	1	1	00001
+PT	99	99	99	99 	FL	RM120010015         	ARCHER	1	1	00001
+PT	99	99	99	99 	FL	RM120010020         	ARCHER OPA	1	1	00001
+PT	99	99	99	99 	FL	RM120010025         	CROSS CREEK FD	1	1	00001
+PT	99	99	99	99 	FL	RM120010035         	GAINESVILLE	1	1	00001
+PT	99	99	99	99 	FL	RM120010040         	HAWTHORNE	1	1	00001
+PT	99	99	99	99 	FL	RM120010045         	HAWTHORNE OPA	1	1	00001
+PT	99	99	99	99 	FL	RM120010050         	HIGH SPRINGS	1	1	00001
+ **SiteManager only prints the first 10 records of the BCP file to the log
+##########################################################################################################
+BCP Results for HOSeleRespondingFireDept.bcp
+##########################################################################################################
+
+
+Bulk Copy completed successfully.
+Source: E:\CSCCODEMOVES\MOVEFORM264174\HOSeleRespondingFireDept.bcp
+Destination: [dbo].[HOSeleRespondingFireDept]
+Rows copied: 8657
+Bulk Copy duration: 0 minutes and 0.546 seconds
+##########################################################################################################
+Completed executing BCP Item: HOSeleRespondingFireDept.bcp
+##########################################################################################################
+##########################################################################################################
+Executing BCP Item: SHSeleHurricaneDed.bcp
+##########################################################################################################
+PT	00	01	00	HO 	FL	HO 	3	A 	$500 AP $500 HURRICANE    	0	0	-500.0	0
+PT	00	01	00	HO 	FL	HO 	3	B 	$500 AP 1% HURRICANE     	0	1	0.01	0
+PT	00	01	00	HO 	FL	HO 	3	C 	$500 AP 2% HURRICANE      	0	2	0.02	0
+PT	00	01	00	HO 	FL	HO 	3	D 	$2,500 AP 2% HURRICANE    	0	10	0.02	0
+PT	00	01	00	HO 	FL	HO 	3	E 	$1,000 AP 5% HURRICANE    	0	7	5.0000000000000003E-2	0
+PT	00	01	00	HO 	FL	HO 	3	F 	$2,500 AP 5% HURRICANE    	0	11	5.0000000000000003E-2	0
+PT	00	01	00	HO 	FL	HO 	3	G 	$1,000 AP 10% HURRICANE	0	8	0.10000000000000001	0
+PT	00	01	00	HO 	FL	HO 	3	H 	$2,500 AP 10% HURRICANE	0	12	0.10000000000000001	0
+PT	00	01	00	HO 	FL	HO 	3	I 	$500 AP 5% HURRICANE	0	3	5.0000000000000003E-2	0
+PT	00	01	00	HO 	FL	HO 	3	J 	$500 AP 10% HURRICANE	0	4	0.10000000000000001	0
+ **SiteManager only prints the first 10 records of the BCP file to the log
+##########################################################################################################
+BCP Results for SHSeleHurricaneDed.bcp
+##########################################################################################################
+
+
+Bulk Copy completed successfully.
+Source: E:\CSCCODEMOVES\MOVEFORM264174\SHSeleHurricaneDed.bcp
+Destination: [dbo].[SHSeleHurricaneDed]
+Rows copied: 557
+Bulk Copy duration: 0 minutes and 0.31 seconds
+##########################################################################################################
+Completed executing BCP Item: SHSeleHurricaneDed.bcp
+##########################################################################################################
+##########################################################################################################
+Executing BCP Item: SHSeleDeliveryIdDateAssignment.bcp
+##########################################################################################################
+PT	00	01	00	FP 	FL	99	UPC3301	2018-09-05 00:00:00.000	2099-01-01 00:00:00.000	2018-09-25 00:00:00.000	UPC-3301 date before DeliveryIdDate use 0.85 otherwise use UPC threshold
+PT	00	01	00	HO 	FL	6 	UPC2191	2018-01-01 00:00:00.000	2019-01-01 00:00:00.000	2018-06-30 00:00:00.000	UPC-2191 LA Legacy Edit
+PT	00	09	00	HO 	FL	3 	UPC2685	2018-07-10 00:00:00.000	2099-01-01 00:00:00.000	2018-07-25 00:00:00.000	UPC-2685 PCR 954 - Removal of FL HO3 Hurricane Deductions
+PT	00	09	00	HO 	FL	3 	UPC4071	2019-02-11 00:00:00.000	2099-01-01 00:00:00.000	2019-03-06 00:00:00.000	UPC-4071 For FL HO3 MCO 09 only - Revert to Tiger TQ Threshold Table
+PT	00	09	00	HO 	FL	3 	UPC4311NB	2019-04-01 00:00:00.000	2099-01-01 00:00:00.000	2019-06-15 00:00:00.000	UPC-4311 NB-Optional Coverages SERVLN and HMSYSP
+PT	00	09	00	HO 	FL	3 	UPC4311RB	2019-04-01 00:00:00.000	2099-01-01 00:00:00.000	2019-07-15 00:00:00.000	UPC-4311 RB-Optional coverages SERVLN and HMSYSP
+PT	00	09	00	HO 	FL	3 	UPC4834	2019-09-17 00:00:00.000	2099-01-01 00:00:00.000	2019-12-15 00:00:00.000	UPC-4834 FL HO3 1.1 Flood Coverage
+PT	00	17	00	FP 	LA	3 	UPC3518	2018-01-01 00:00:00.000	2019-05-07 00:00:00.000	2019-08-01 00:00:00.000	UPC-3518 LA DP3 2.0 Legacy Edit
+PT	00	17	00	HO 	LA	3 	UPC1426	2018-01-01 00:00:00.000	2018-04-06 00:00:00.000	2018-05-28 00:00:00.000	UPC-1426 LA Legacy Edit
+PT	00	17	00	HO 	LA	3 	UPC1482	2018-01-01 00:00:00.000	2018-04-06 00:00:00.000	2018-05-27 00:00:00.000	UPC-1482 LA Version 2.0 Back Dating Edit
+ **SiteManager only prints the first 10 records of the BCP file to the log
+##########################################################################################################
+BCP Results for SHSeleDeliveryIdDateAssignment.bcp
+##########################################################################################################
+
+
+Bulk Copy completed successfully.
+Source: E:\CSCCODEMOVES\MOVEFORM264174\SHSeleDeliveryIdDateAssignment.bcp
+Destination: [dbo].[SHSeleDeliveryIdDateAssignment]
+Rows copied: 44
+Bulk Copy duration: 0 minutes and 0.16 seconds
+##########################################################################################################
+Completed executing BCP Item: SHSeleDeliveryIdDateAssignment.bcp
+##########################################################################################################
+##########################################################################################################
+Executing BCP Item: SHAdminSeleEEVendorName.bcp
+##########################################################################################################
+All	All	0
+ANSWERFINANCiAL	AFI HART	4
+BOLT	BOLT	3
+IOA	IOA	5
+IVANTAGE	IVANTAGE	1
+PLRATING	PLRATING	2
+##########################################################################################################
+BCP Results for SHAdminSeleEEVendorName.bcp
+##########################################################################################################
+
+
+Bulk Copy completed successfully.
+Source: E:\CSCCODEMOVES\MOVEFORM264174\SHAdminSeleEEVendorName.bcp
+Destination: [dbo].[SHAdminSeleEEVendorName]
+Rows copied: 6
+Bulk Copy duration: 0 minutes and 0.0 seconds
+##########################################################################################################
+Completed executing BCP Item: SHAdminSeleEEVendorName.bcp
+##########################################################################################################
+##########################################################################################################
+Promote Process Succeeded: 10/22/2019 7:49:48 AM

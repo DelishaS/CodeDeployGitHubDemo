@@ -1,0 +1,66 @@
+Start Time: Wed 10/23/2019  0:43:07.06 
+Changed database context to 'PRD_NoticeOfLoss'.
+10 percent processed.
+20 percent processed.
+30 percent processed.
+40 percent processed.
+50 percent processed.
+60 percent processed.
+70 percent processed.
+80 percent processed.
+90 percent processed.
+Processed 144056 pages for database 'PRD_NoticeOfloss', file 'NoticeOfLoss' on file 1.
+100 percent processed.
+Processed 2 pages for database 'PRD_NoticeOfloss', file 'NoticeOfLoss_Log' on file 1.
+BACKUP DATABASE successfully processed 144058 pages in 26.862 seconds (41.897 MB/sec).
+Warning: -c overrides -f.
+
+Starting copy...
+SQLState = 22005, NativeError = 0
+Error = [Microsoft][SQL Server Native Client 10.0]Invalid character value for cast specification
+SQLState = S1000, NativeError = 0
+Error = [Microsoft][SQL Server Native Client 10.0]Unexpected EOF encountered in BCP data-file
+
+6 rows copied.
+Network packet size (bytes): 4096
+Clock Time (ms.) Total     : 156    Average : (38.46 rows per sec.)
+Warning: -c overrides -f.
+
+Starting copy...
+
+180 rows copied.
+Network packet size (bytes): 4096
+Clock Time (ms.) Total     : 391    Average : (460.36 rows per sec.)
+Warning: -c overrides -f.
+
+Starting copy...
+
+244 rows copied.
+Network packet size (bytes): 4096
+Clock Time (ms.) Total     : 469    Average : (520.26 rows per sec.)
+
+(1 rows affected)
+End Time: Wed 10/23/2019  0:43:46.43 
+Start Time: Wed 10/23/2019  0:44:11.14 
+Changed database context to 'PRD_Inquiry'.
+10 percent processed.
+20 percent processed.
+30 percent processed.
+40 percent processed.
+50 percent processed.
+60 percent processed.
+70 percent processed.
+80 percent processed.
+90 percent processed.
+Processed 7406496 pages for database 'PRD_Inquiry', file 'DST_Inquiry' on file 1.
+100 percent processed.
+Processed 5533 pages for database 'PRD_Inquiry', file 'DST_Inquiry_Log' on file 1.
+BACKUP DATABASE successfully processed 7412029 pages in 1108.971 seconds (52.216 MB/sec).
+Warning: -c overrides -f.
+
+Starting copy...
+
+43 rows copied.
+Network packet size (bytes): 4096
+Clock Time (ms.) Total     : 15     Average : (2866.67 rows per sec.)
+End Time: Wed 10/23/2019  1:02:47.02 

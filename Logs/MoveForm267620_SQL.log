@@ -1,0 +1,117 @@
+/****** Object:  StoredProcedure [dbo].[Get_Work_Item_Id_To_Be_Assigned]    Script Date: 1/16/2020 6:21:27 AM ******/
+DROP PROCEDURE [dbo].[Get_Work_Item_Id_To_Be_Assigned]
+
+/****** Object:  StoredProcedure [dbo].[Get_Work_Item_Id_To_Be_Assigned]    Script Date: 1/16/2020 6:21:27 AM ******/
+SET ANSI_NULLS ON
+
+SET QUOTED_IDENTIFIER OFF
+
+
+/****************************************************
+This Stored prodecure is used to get the list of unassigned work items.
+Created by -Vinay Kumar
+Dated-03/31/2016
+*****************************************************/
+
+
+CREATE PROCEDURE [dbo].[Get_Work_Item_Id_To_Be_Assigned]
+
+AS
+Delete from All_Assign_Able_Work_Item_Id
+Delete from Tran_follow_Once_And_Done 
+Delete from temp_PolNo_table
+
+
+--Create the list of transactions which follow the once and done logic.
+insert into Tran_follow_Once_And_Done Select distinct  trty_transaction_type   
+ from WF_SELE_TRANSACTION_TYPES where 
+ (trty_transaction_type not in (select * from Rules_C02_Trans_Exclude)
+ and trty_transaction_type not in (select * from Rules_C02_Trans_Exclude2)) 
+
+ --Get all the work items which are unassigned but transactions type which does not follow once and done logic
+ insert into All_Assign_Able_Work_Item_Id
+select  WKIT_WORK_ITEM_ID,PLKY_POLICY_NUMBER,Wkit_Transaction_type,wkit_current_user_id from 
+	dbo.WF_WORK_ITEMS 
+	LEFT OUTER JOIN
+    dbo.WF_WORK_ITEM_POLICIES ON 
+    dbo.WF_WORK_ITEMS.WKIT_WORK_ITEM_ID = dbo.WF_WORK_ITEM_POLICIES.WKPL_WORK_ITEM_ID 
+	LEFT OUTER JOIN
+    dbo.WF_POLICY_KEYS ON dbo.WF_WORK_ITEM_POLICIES.WKPL_POLICY_KEY_ID = dbo.WF_POLICY_KEYS.PLKY_POLICY_KEY_ID
+	where wkit_current_user_id ='UNASGN'
+	and (Wkit_Transaction_type not in (select * from Tran_follow_Once_And_Done))
+	and WKIT_WORK_ITEM_ID >'20140717055751803'
+	and wkit_active_status_ind='1'
+
+--Get all the work item which is assigned to specify users which further assign to other user based on logic in rule program
+	insert into All_Assign_Able_Work_Item_Id
+	select  WKIT_WORK_ITEM_ID,PLKY_POLICY_NUMBER,Wkit_Transaction_type,wkit_current_user_id  from 
+	dbo.WF_WORK_ITEMS 
+	LEFT OUTER JOIN
+    dbo.WF_WORK_ITEM_POLICIES ON 
+    dbo.WF_WORK_ITEMS.WKIT_WORK_ITEM_ID = dbo.WF_WORK_ITEM_POLICIES.WKPL_WORK_ITEM_ID 
+	LEFT OUTER JOIN
+    dbo.WF_POLICY_KEYS ON dbo.WF_WORK_ITEM_POLICIES.WKPL_POLICY_KEY_ID = dbo.WF_POLICY_KEYS.PLKY_POLICY_KEY_ID
+	where wkit_current_user_id ='UNASGN'
+	and (Wkit_Transaction_type  in ('B29','C29'))
+	and WKIT_WORK_ITEM_ID >'20140717055751803'
+	and wkit_active_status_ind='1'
+	
+	--Get all the work item which is assigned to specify users which further assign to other user based on logic in rule program
+	insert into All_Assign_Able_Work_Item_Id
+	select  WKIT_WORK_ITEM_ID,PLKY_POLICY_NUMBER,Wkit_Transaction_type,wkit_current_user_id  from 
+	dbo.WF_WORK_ITEMS 
+	LEFT OUTER JOIN
+    dbo.WF_WORK_ITEM_POLICIES ON 
+    dbo.WF_WORK_ITEMS.WKIT_WORK_ITEM_ID = dbo.WF_WORK_ITEM_POLICIES.WKPL_WORK_ITEM_ID 
+	LEFT OUTER JOIN
+    dbo.WF_POLICY_KEYS ON dbo.WF_WORK_ITEM_POLICIES.WKPL_POLICY_KEY_ID = dbo.WF_POLICY_KEYS.PLKY_POLICY_KEY_ID
+	where wkit_current_user_id in ('UNDREVIEW','PROCREVIEW','TECHREVIEW','UWREVIEW','FPICORPUW','EDICORPUW','REVDREN','REVRENTECH')
+	and WKIT_WORK_ITEM_ID >'20140717055751803'
+	and wkit_active_status_ind='1'
+
+--Get all the policy number which has UC's are open and unassigned.
+	insert into temp_PolNo_table
+	select plky_policy_symbol+plky_policy_number -- DXC-1020-QIS-627 Added plky_policy_symbol+
+	from 
+	(
+	select WKIT_WORK_ITEM_ID
+	from WF_WORK_ITEMS
+	where Wkit_transaction_type  in('UC','UC4','UC6') 
+	and wkit_current_user_id ='UNASGN'
+	and wkit_active_status_ind='1'
+	and WKIT_WORK_ITEM_ID >'20140717055751803')tmp 
+	LEFT OUTER JOIN
+	dbo.WF_WORK_ITEM_POLICIES ON 
+	tmp.WKIT_WORK_ITEM_ID = dbo.WF_WORK_ITEM_POLICIES.WKPL_WORK_ITEM_ID 
+	LEFT OUTER JOIN
+	dbo.WF_POLICY_KEYS ON dbo.WF_WORK_ITEM_POLICIES.WKPL_POLICY_KEY_ID = dbo.WF_POLICY_KEYS.PLKY_POLICY_KEY_ID
+
+	--Get all the work items which follow once and done logic but that on the specify 
+	--policy UC's not exist.so that they can assign indivisualy
+	 insert into All_Assign_Able_Work_Item_Id
+	select distinct WKIT_WORK_ITEM_ID,PLKY_POLICY_NUMBER,Wkit_Transaction_type,wkit_current_user_id from 
+	dbo.WF_WORK_ITEMS 
+	LEFT OUTER JOIN
+	dbo.WF_WORK_ITEM_POLICIES ON 
+	dbo.WF_WORK_ITEMS.WKIT_WORK_ITEM_ID = dbo.WF_WORK_ITEM_POLICIES.WKPL_WORK_ITEM_ID 
+	LEFT OUTER JOIN
+	dbo.WF_POLICY_KEYS ON dbo.WF_WORK_ITEM_POLICIES.WKPL_POLICY_KEY_ID = dbo.WF_POLICY_KEYS.PLKY_POLICY_KEY_ID
+	where wkit_transaction_type in(select * from Tran_follow_Once_And_Done)
+	and wkit_current_user_id ='UNASGN'
+	and WKIT_WORK_ITEM_ID >'20140717055751803'
+	and wkit_active_status_ind='1'
+	and plky_policy_symbol+plky_policy_number   not in(select * from temp_PolNo_table)	-- DXC-1020-QIS-627 Added plky_policy_symbol+
+
+
+
+
+
+
+
+
+GRANT EXECUTE ON [dbo].[Get_Work_Item_Id_To_Be_Assigned] TO [Analysts] AS [dbo]
+
+GRANT EXECUTE ON [dbo].[Get_Work_Item_Id_To_Be_Assigned] TO [SuppTableOwner] AS [dbo]
+
+GRANT EXECUTE ON [dbo].[Get_Work_Item_Id_To_Be_Assigned] TO [Technical] AS [dbo]
+

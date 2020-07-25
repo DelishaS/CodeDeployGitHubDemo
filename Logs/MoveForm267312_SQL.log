@@ -1,0 +1,133 @@
+USE UAT_NewBusiness
+
+Changed database context to 'UAT_NewBusiness'.
+
+BACKUP DATABASE UAT_NewBusiness TO DISK = 'E:\Microsoft SQL Server\MSSQL10_50.MSSQLSERVER\MSSQL\Backup\CodeM\UAT_NewBusiness.bak' WITH NOFORMAT, NOINIT, NAME = 'UAT_NewBusiness', SKIP, NOREWIND, NOUNLOAD, STATS = 10
+
+10 percent processed.
+20 percent processed.
+30 percent processed.
+40 percent processed.
+50 percent processed.
+60 percent processed.
+70 percent processed.
+80 percent processed.
+90 percent processed.
+Processed 1207952 pages for database 'UAT_NewBusiness', file 'NewBusiness' on file 25.
+100 percent processed.
+Processed 2 pages for database 'UAT_NewBusiness', file 'NewBusiness_Log' on file 25.
+BACKUP DATABASE successfully processed 1207954 pages in 31.903 seconds (295.807 MB/sec).
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[PurgeDataNewBusiness]') AND type in (N'P', N'PC'))
+DROP PROCEDURE [dbo].[PurgeDataNewBusiness]
+
+SET ANSI_NULLS ON
+
+SET QUOTED_IDENTIFIER ON
+
+  
+CREATE Procedure [dbo].[PurgeDataNewBusiness]  
+As             
+
+set nocount on   
+
+Declare @TempCount int                
+Declare @TempTable as table                         
+(                          
+AppId varchar(20),  
+PolicyNumber varchar(10),   
+Reason varchar(300)                     
+)   
+--FPM 458
+Insert into  @TempTable (AppId,PolicyNumber,Reason)                     
+(select AppId,PolicyNumber,'Reason - lazy = 0,effectivedate > 90 days old or PolicyLastQuoteDt > 90 days Or LastUpdatedate > 90 days, Archived or new Business Quote' as Reason -- FPM-538 Changed from 1 Year to 90 days
+	from SHPlanInfo 
+	where LazyDeleteInd = '0' and Issued = '0'  And PolicyStatusCd in ('N','P') AND RatePackageCd = 'Z'	-- DXC-879-FPM-530 Added RatePackageCd
+		and (DATEDIFF( day , Effectivedate , getdate() ) > '90' or DATEDIFF( day , PolicyLastQuoteDt , getdate() ) > '90' or DATEDIFF( day , LastUpdatedate , getdate() ) > '90')	-- FPM-538 Changed from 365 to 90 days
+)    
+
+--FPM 458 
+Insert into  @TempTable (AppId,PolicyNumber,Reason)                     
+(select AppId,PolicyNumber,'Reason - lazy = 0,effectivedate > 1 Year old or PolicyLastQuoteDt > 1yr Or LastUpdatedate > 1yr, PolicyStatusCd in (A,O)' as Reason 
+	from SHPlanInfo 
+	where LazyDeleteInd = '0' and Issued = '0'  And PolicyStatusCd in ('A','O')
+		and (DATEDIFF( day , Effectivedate , getdate() ) > '365' or DATEDIFF( day , PolicyLastQuoteDt , getdate() ) > '365' or DATEDIFF( day , LastUpdatedate , getdate() ) > '365')
+)    
+
+--FPM 458     
+Insert into  @TempTable (AppId,PolicyNumber,Reason)   
+(select AppId, PolicyNumber,'Reason - lazy = 1, Archived or new Business Quote' as Reason 
+	from SHPlanInfo 
+	where LazyDeleteInd = '1' And PolicyStatusCd in ('N','P') and Issued = '0'
+)  
+  
+Insert into  @TempTable (AppId,PolicyNumber,Reason)   
+(select AppId,PolicyNumber,'Reason - lazy = 1,PolicyStatusCd in (A,O)' as Reason 
+	from SHPlanInfo 
+	where PolicyStatusCd in ('A','O') and LazyDeleteInd = '1' and Issued = '0'
+)   
+   
+Insert into  @TempTable (AppId,PolicyNumber,Reason)   
+(select AppId,PolicyNumber,'Reason - PolicyNumber = 0 or AppId = 0' as Reason 
+	from SHPlanInfo   
+	where PolicyNumber = '0' or AppId = '0'
+)              
+   
+set @TempCount = (select count(*) from @TempTable)  
+select AppId,PolicyNumber,Reason from @TempTable   
+
+INSERT INTO IPQuoteDeleteInfoLog (PolicyNumber,AppId,Reason,RecordTimeStamp)
+Select PolicyNumber,AppId,Reason,CURRENT_TIMESTAMP FROM @TempTable
+
+if  @TempCount > '0'   
+begin
+	delete from IPPolicyInfoClientStructure where appid in (select appid from @TempTable)  
+	delete from IPRatePackages where appid in (select appid from @TempTable)  
+	delete from IPTabStatus where appid in (select appid from @TempTable)
+	delete from CLLossHistory where appid in (select appid from @TempTable)  
+	delete from HOExtCovParms where appid in (select appid from @TempTable)  
+	delete from HOExtCovSchedule where appid in (select appid from @TempTable)  
+	delete from HOPropertyLocation where appid in (select appid from @TempTable)  
+	delete from HORating where appid in (select appid from @TempTable)  
+	delete from HOCredits where appid in (select appid from @TempTable)  
+	delete from HOStructureCoverages where appid in (select appid from @TempTable)  
+	delete from HOStructureExtCoverages where appid in (select appid from @TempTable)  
+	delete from HOStructureExtData where appid in (select appid from @TempTable)  
+	delete from HOStructureRating where appid in (select appid from @TempTable) 
+	delete from HOClaimHistoryLossPayment where appid in (select appid from @TempTable)
+	delete from HOClaimsHistory where appid in (select appid from @TempTable)
+	delete from HOLossesCount where appid in (select appid from @TempTable)
+	delete from HOClaimsStatusDesc where appid in (select appid from @TempTable)
+	delete from SHBillPayment where appid in (select appid from @TempTable) 
+	delete from SHBillingInfo where appid in (select appid from @TempTable)   
+	delete from SHClient where appid in (select appid from @TempTable)  
+	delete from SHClientAddress where appid in (select appid from @TempTable)  
+	delete from SHClientPhone where appid in (select appid from @TempTable)  
+	delete from SHCoverages where appid in (select appid from @TempTable)  
+	delete from SHOptionalForms where appid in (select appid from @TempTable)  
+	delete from SHPlanInfo  where appid in (select appid from @TempTable)  
+	delete from SHPropertyLocation where appid in (select appid from @TempTable)   
+	delete from SHRatingErrors where appid in (select appid from @TempTable)   
+	delete from SHRemarks where appid in (select appid from @TempTable)  
+	delete from SHStopperQuestionsRemarks where appid in (select appid from @TempTable)  
+	delete from SHUnderwritingInfo where appid in (select appid from @TempTable)  
+	delete from SHUnderwritingMessages where appid in (select appid from @TempTable Where LTRIM(RTRIM(Appid)) <> '' And (Reason <> 'Reason - lazy = 1,PolicyStatusCd in (A,O)' And Reason <> 'Reason - lazy = 0,effectivedate > 1 Year old or PolicyLastQuoteDt > 1yr Or LastUpdatedate > 1yr, PolicyStatusCd in (A,O)'))  -- FSIT-204869 Added  Where LTRIM(RTRIM(Appid)) <> '' And Reason <> 'Reason - lazy = 0,policystatuscd in (A,O)' --FPM 458 
+	delete from SHVehicles where appid in (select appid from @TempTable)  
+	delete from SHQuoteFromEmailAddress where appid in (select appid from @TempTable)  
+	delete from SHQuoteToEmailAddress where appid in (select appid from @TempTable)  
+	delete from SHQuoteCCEmailAddress where appid in (select appid from @TempTable)  
+	delete from IPCreditHistoryInformation where appid in (select appid from @TempTable)  --FPM 505
+	Update SHUnderwritingMessages Set PolicyNotExist = 1 Where AppId in (Select AppId From @TempTable Where LTRIM(RTRIM(Appid)) <> '' And (Reason = 'Reason - lazy = 1,PolicyStatusCd in (A,O)' OR  Reason = 'Reason - lazy = 0,effectivedate > 1 Year old or PolicyLastQuoteDt > 1yr Or LastUpdatedate > 1yr, PolicyStatusCd in (A,O)'))  --FPM 458 
+	DELETE FROM RCEResponseInfo WHERE AppId IN (SELECT AppId FROM @TempTable WHERE LTRIM(RTRIM(AppId)) <> '' AND (Reason <> 'Reason - lazy = 1,PolicyStatusCd in (A,O)' AND Reason <> 'Reason - lazy = 0,effectivedate > 1 Year old or PolicyLastQuoteDt > 1yr Or LastUpdatedate > 1yr, PolicyStatusCd in (A,O)'))	-- FPM-517: Do not delete RCE of AppId of deleted Endorsement because it may be re-used in another endorsement of the same policy.
+end  
+
+	--FPM-417 PP Starts
+	DELETE CPEE FROM HOExtCovParmsEE CPEE WHERE NOT EXISTS(SELECT TOP 1 1 FROM SHPlanInfo AS SHPI WHERE SHPI.AppId = CPEE.AppId)
+	DELETE ECEE FROM HOStructureExtCoveragesEE ECEE WHERE NOT EXISTS(SELECT TOP 1 1 FROM SHPlanInfo AS SHPI WHERE SHPI.AppId = ECEE.AppId)
+	DELETE QMEE	FROM IPQuoteMatrixEE QMEE WHERE NOT EXISTS(SELECT TOP 1 1 FROM SHPlanInfo AS SHPI WHERE SHPI.AppId = QMEE.AppId)	
+	DELETE IPRP FROM IPRatePackages IPRP WHERE NOT EXISTS(SELECT TOP 1 1 FROM SHPlanInfo AS SHPI WHERE SHPI.AppId = IPRP.AppId)
+	--FPM-417 PP Ends
+
+return 0
+
+GRANT EXECUTE ON [dbo].[PurgeDataNewBusiness] TO [isol_app] AS [dbo]
+
