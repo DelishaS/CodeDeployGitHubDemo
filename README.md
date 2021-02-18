@@ -1,1 +1,2 @@
-hello
+Monday=abcdef
+Tuesday=kfgh
